@@ -9,9 +9,13 @@ use Illuminate\Support\Facades\DB;
 
 class PeminjamanController extends Controller
 {
+
     public function index()
     {
-        $peminjaman = Peminjaman::with(['barang','user'])->latest()->get();
+        $peminjaman = Peminjaman::with('barang','user')
+            ->latest()
+            ->get();
+
         return view('peminjaman.index', compact('peminjaman'));
     }
 
@@ -24,12 +28,11 @@ class PeminjamanController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'kode_peminjaman' => 'required|unique:peminjaman',
-            'nama_peminjam'   => 'required',
-            'jenis_peminjam'  => 'required',
-            'barang_id'       => 'required',
-            'jumlah'          => 'required|integer|min:1',
-            'tanggal_pinjam'  => 'required|date',
+            'nama_peminjam'  => 'required',
+            'jenis_peminjam' => 'required|in:siswa,guru,umum',
+            'barang_id'      => 'required|exists:barang,id',
+            'jumlah'         => 'required|integer|min:1',
+            'tanggal_pinjam' => 'required|date',
         ]);
 
         DB::transaction(function () use ($request) {
@@ -37,19 +40,18 @@ class PeminjamanController extends Controller
             $barang = Barang::lockForUpdate()->find($request->barang_id);
 
             if ($request->jumlah > $barang->jumlah) {
-                abort(400,'Stok tidak mencukupi');
+                abort(400, 'Stok tidak mencukupi');
             }
 
             $barang->decrement('jumlah', $request->jumlah);
 
             Peminjaman::create([
-                'kode_peminjaman' => $request->kode_peminjaman,
+                'kode_peminjaman' => 'PMJ-' . time(),
                 'nama_peminjam'   => $request->nama_peminjam,
                 'jenis_peminjam'  => $request->jenis_peminjam,
                 'barang_id'       => $request->barang_id,
                 'jumlah'          => $request->jumlah,
                 'tanggal_pinjam'  => $request->tanggal_pinjam,
-                'status'          => 'dipinjam',
                 'user_id'         => auth()->id(),
             ]);
         });
@@ -60,28 +62,14 @@ class PeminjamanController extends Controller
 
     public function update(Peminjaman $peminjaman)
     {
-        if ($peminjaman->status === 'dikembalikan') {
-            return back()->with('error','Sudah dikembalikan');
-        }
-
         DB::transaction(function () use ($peminjaman) {
+
             $peminjaman->barang->increment('jumlah', $peminjaman->jumlah);
-            $peminjaman->update([
-                'status' => 'dikembalikan',
-                'tanggal_kembali' => now()
-            ]);
+
+            $peminjaman->delete();
         });
 
-        return back()->with('success','Barang dikembalikan');
-    }
-
-    public function destroy(Peminjaman $peminjaman)
-    {
-        if ($peminjaman->status === 'dipinjam') {
-            return back()->with('error','Tidak bisa hapus peminjaman aktif');
-        }
-
-        $peminjaman->delete();
-        return back()->with('success','Data dihapus');
+        return redirect()->route('peminjaman.index')
+            ->with('success','Barang berhasil dikembalikan');
     }
 }

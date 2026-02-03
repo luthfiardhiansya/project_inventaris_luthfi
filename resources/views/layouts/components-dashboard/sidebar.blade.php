@@ -68,7 +68,7 @@
         <li class="menu-header small text-uppercase">
             <span class="menu-header-text">Pages</span>
         </li>
-        <li class="menu-item {{ request()->routeIs('dashboard.users.*') ? 'active' : '' }}">
+        <li class="menu-item">
             <a href="{{ route('dashboard.users.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-user"></i>
                 <div data-i18n="Analytics">Users Management</div>
@@ -90,7 +90,18 @@
                         <div data-i18n="Notifications">Product</div>
                     </a>
                 </li>
+                <li class="menu-item">
+                    <a href="{{ route('lokasi.index') }}" class="menu-link">
+                        <div data-i18n="Notifications">Lokasi</div>
+                    </a>
+                </li>
             </ul>
+        <li class="menu-item">
+            <a href="{{ route('peminjaman.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-task"></i>
+                <div data-i18n="Analytics">Peminjaman</div>
+            </a>
+        </li>
         </li>
     </ul>
 </aside>

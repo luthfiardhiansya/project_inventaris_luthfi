@@ -1,109 +1,103 @@
 @extends('layouts.dashboard')
 
-@section('title', 'Daftar Barang')
+@section('title', 'Data Barang')
 
 @section('content')
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="h3 text-gray-800">Daftar Barang</h2>
-    <a href="{{ route('barang.create') }}" class="btn btn-primary">
-        <i class="bi bi-plus-lg"></i> Tambah Barang
-    </a>
-</div>
-
-<form method="GET" class="row g-2 mb-4">
-    <div class="col-md-4">
-        <input
-            type="text"
-            name="search"
-            class="form-control"
-            placeholder="Cari barang..."
-            value="{{ request('search') }}"
-        >
+@if(session('success'))
+    <div class="alert alert-success auto-dismiss">
+        {{ session('success') }}
     </div>
+@endif
 
-    <div class="col-md-4">
-        <select name="kategori" class="form-select">
-            <option value="">Semua Kategori</option>
-            @foreach($kategori as $item)
-                <option
-                    value="{{ $item->id }}"
-                    {{ request('kategori') == $item->id ? 'selected' : '' }}
-                >
-                    {{ $item->nama }}
-                </option>
-            @endforeach
-        </select>
+@if(session('error'))
+    <div class="alert alert-danger auto-dismiss">
+        {{ session('error') }}
     </div>
+@endif
+<h2 class="h4 mb-4">Data Barang</h2>
 
-    <div class="col-md-2">
-        <button class="btn btn-outline-secondary w-100">
-            Filter
-        </button>
-    </div>
-</form>
 
-<div class="card shadow-sm border-0">
-    <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
+<div class="card border-0 shadow-sm">
+    <div class="card-body">
+
+        <a href="{{ route('barang.create') }}" class="btn btn-primary mb-3">
+            + Tambah Barang
+        </a>
+
+        <table class="table table-hover align-middle">
             <thead class="table-light">
                 <tr>
-                    <th>Foto</th>
-                    <th>Nama Barang</th>
+                    <th>Kode</th>
+                    <th>Nama</th>
                     <th>Kategori</th>
+                    <th>Lokasi</th>
                     <th>Jumlah</th>
+                    <th>Harga Satuan</th>
                     <th>Kondisi</th>
-                    <th width="160">Aksi</th>
+                    <th width="180">Aksi</th>
                 </tr>
             </thead>
-
             <tbody>
                 @forelse($barang as $item)
-                    <tr>
-                        <td>
-                            <img
-                                src="{{ $item->gambar ? asset('storage/'.$item->gambar) : asset('img/no-image.png') }}"
-                                class="rounded"
-                                style="width:60px;height:60px;object-fit:cover;background:#f1f3f5;"
-                            >
-                        </td>
-
-                        <td>{{ $item->nama }}</td>
-
-                        <td>{{ $item->kategori->nama ?? '-' }}</td>
-
-                        <td>{{ $item->jumlah }}</td>
-
-                        <td>
-                            <span class="badge bg-{{ $item->kondisi === 'baik' ? 'success' : 'warning' }}">
-                                {{ ucfirst($item->kondisi) }}
-                            </span>
-                        </td>
-
-                        <td>
-                            <a href="{{ route('barang.show', $item) }}"
-                               class="btn btn-sm btn-info">
+                <tr>
+                    <td>{{ $item->kode_barang }}</td>
+                    <td>{{ $item->nama_barang }}</td>
+                    <td>{{ $item->kategori->nama ?? '-' }}</td>
+                    <td>{{ $item->lokasi->nama ?? '-' }}</td>
+                    <td>{{ $item->jumlah }}</td>
+                    <td>Rp {{ number_format($item->satuan, 0, ',', '.') }}</td>
+                    <td>
+                        <span class="badge bg-{{ $item->kondisi == 'baik' ? 'success' : 'danger' }}">
+                            {{ ucfirst($item->kondisi) }}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="d-flex gap-1">
+                            <a href="{{ route('barang.show', $item->id) }}"
+                               class="btn btn-sm btn-info text-white">
                                 Detail
                             </a>
 
-                            <a href="{{ route('barang.edit', $item) }}"
+                            <a href="{{ route('barang.edit', $item->id) }}"
                                class="btn btn-sm btn-warning">
                                 Edit
                             </a>
-                        </td>
-                    </tr>
+
+                            <form action="{{ route('barang.destroy', $item->id) }}"
+                                  method="POST"
+                                  onsubmit="return confirm('Hapus barang ini?')">
+                                @csrf
+                                @method('DELETE')
+                                <button class="btn btn-sm btn-danger">
+                                    Hapus
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
                 @empty
-                    <tr>
-                        <td colspan="6" class="text-center py-4">
-                            Data barang kosong
-                        </td>
-                    </tr>
+                <tr>
+                    <td colspan="7" class="text-center text-muted">
+                        Data barang belum ada
+                    </td>
+                </tr>
                 @endforelse
             </tbody>
         </table>
+
+        {{ $barang->links() }}
+
     </div>
 </div>
 
-<div class="mt-3">
-    {{ $barang->links('pagination::bootstrap-5') }}
-</div>
+<script>
+    setTimeout(() => {
+        document.querySelectorAll('.auto-dismiss').forEach(el => {
+            el.classList.add('fade');
+            el.classList.remove('show');
+
+            setTimeout(() => el.remove(), 500);
+        });
+    }, 3000);
+</script>
 @endsection

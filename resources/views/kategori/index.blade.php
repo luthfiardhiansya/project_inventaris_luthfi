@@ -3,6 +3,17 @@
 @section('title', 'Data Kategori')
 
 @section('content')
+@if(session('success'))
+    <div class="alert alert-success auto-dismiss">
+        {{ session('success') }}
+    </div>
+@endif
+
+@if(session('error'))
+    <div class="alert alert-danger auto-dismiss">
+        {{ session('error') }}
+    </div>
+@endif
 <div class="d-flex justify-content-between mb-4">
     <h2 class="h4">Data Kategori</h2>
     <a href="{{ route('kategori.create') }}" class="btn btn-primary">
@@ -36,8 +47,27 @@
                     <td>{{ $item->nama }}</td>
                     <td>{{ $item->deskripsi ?? '-' }}</td>
                     <td>
-                        <a href="{{ route('kategori.show', $item) }}" class="btn btn-sm btn-info">Detail</a>
-                        <a href="{{ route('kategori.edit', $item) }}" class="btn btn-sm btn-warning">Edit</a>
+                        <div class="d-flex gap-1">
+                            <a href="{{ route('kategori.show', $item->id) }}"
+                               class="btn btn-sm btn-info text-white">
+                                Detail
+                            </a>
+
+                            <a href="{{ route('kategori.edit', $item->id) }}"
+                               class="btn btn-sm btn-warning">
+                                Edit
+                            </a>
+
+                            <form action="{{ route('kategori.destroy', $item->id) }}"
+                                  method="POST"
+                                  onsubmit="return confirm('Hapus kategori ini?')">
+                                @csrf
+                                @method('DELETE')
+                                <button class="btn btn-sm btn-danger">
+                                    Hapus
+                                </button>
+                            </form>
+                        </div>
                     </td>
                 </tr>
                 @empty
@@ -53,4 +83,14 @@
 <div class="mt-3">
     {{ $kategori->links('pagination::bootstrap-5') }}
 </div>
+<script>
+    setTimeout(() => {
+        document.querySelectorAll('.auto-dismiss').forEach(el => {
+            el.classList.add('fade');
+            el.classList.remove('show');
+
+            setTimeout(() => el.remove(), 500);
+        });
+    }, 3000);
+</script>
 @endsection

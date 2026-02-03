@@ -6,6 +6,7 @@ use App\Models\Barang;
 use App\Models\Kategori;
 use App\Models\Lokasi;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class BarangController extends Controller
 {
@@ -13,18 +14,13 @@ class BarangController extends Controller
     {
         $barang = Barang::with(['kategori', 'lokasi'])
             ->when($request->search, function ($q) use ($request) {
-                $q->where('nama_barang', 'like', '%' . $request->search . '%');
-            })
-            ->when($request->kategori, function ($q) use ($request) {
-                $q->where('kategori_id', $request->kategori);
+                $q->where('nama_barang', 'like', '%' . $request->search . '%')
+                  ->orWhere('kode_barang', 'like', '%' . $request->search . '%');
             })
             ->latest()
-            ->paginate(10)
-            ->withQueryString();
+            ->paginate(10);
 
-        $kategori = Kategori::all();
-
-        return view('barang.index', compact('barang', 'kategori'));
+        return view('barang.index', compact('barang'));
     }
 
     public function create()
@@ -38,14 +34,19 @@ class BarangController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'kode_barang' => 'required|unique:barang,kode_barang',
-            'nama_barang' => 'required|string',
+            'nama_barang' => 'required|string|max:100',
             'kategori_id' => 'required|exists:kategori,id',
             'lokasi_id'   => 'required|exists:lokasi,id',
-            'kondisi'     => 'required|in:baik,rusak',
             'jumlah'      => 'required|integer|min:0',
-            'satuan'      => 'required|string',
+            'satuan'      => 'required|string|max:20',
+            'kondisi'     => 'required|in:baik,rusak',
         ]);
+
+        do {
+            $kode = 'BRG-' . strtoupper(Str::random(6));
+        } while (Barang::where('kode_barang', $kode)->exists());
+
+        $validated['kode_barang'] = $kode;
 
         Barang::create($validated);
 
@@ -71,12 +72,12 @@ class BarangController extends Controller
     public function update(Request $request, Barang $barang)
     {
         $validated = $request->validate([
-            'nama_barang' => 'required|string',
+            'nama_barang' => 'required|string|max:100',
             'kategori_id' => 'required|exists:kategori,id',
             'lokasi_id'   => 'required|exists:lokasi,id',
-            'kondisi'     => 'required|in:baik,rusak',
             'jumlah'      => 'required|integer|min:0',
-            'satuan'      => 'required|string',
+            'satuan'      => 'required|string|max:20',
+            'kondisi'     => 'required|in:baik,rusak',
         ]);
 
         $barang->update($validated);

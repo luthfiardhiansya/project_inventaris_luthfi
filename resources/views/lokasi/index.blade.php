@@ -3,6 +3,17 @@
 @section('title', 'Data Lokasi')
 
 @section('content')
+@if(session('success'))
+    <div class="alert alert-success auto-dismiss">
+        {{ session('success') }}
+    </div>
+@endif
+
+@if(session('error'))
+    <div class="alert alert-danger auto-dismiss">
+        {{ session('error') }}
+    </div>
+@endif
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h4>Data Lokasi</h4>
     <a href="{{ route('lokasi.create') }}" class="btn btn-primary">
@@ -10,9 +21,6 @@
     </a>
 </div>
 
-@if(session('success'))
-<div class="alert alert-success">{{ session('success') }}</div>
-@endif
 
 <div class="card">
     <div class="table-responsive">
@@ -67,4 +75,14 @@
         </table>
     </div>
 </div>
+<script>
+    setTimeout(() => {
+        document.querySelectorAll('.auto-dismiss').forEach(el => {
+            el.classList.add('fade');
+            el.classList.remove('show');
+
+            setTimeout(() => el.remove(), 500);
+        });
+    }, 3000);
+</script>
 @endsection
