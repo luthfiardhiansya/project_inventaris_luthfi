@@ -13,25 +13,55 @@ class LokasiController extends Controller
         return view('lokasi.index', compact('lokasi'));
     }
 
+    public function create()
+    {
+        return view('lokasi.create');
+    }
+
     public function store(Request $request)
     {
-        $request->validate(['nama' => 'required']);
-        Lokasi::create($request->all());
+        $validated = $request->validate([
+            'nama' => 'required|string|max:255',
+            'deskripsi' => 'nullable|string',
+        ]);
 
-        return back()->with('success','Lokasi ditambahkan');
+        Lokasi::create($validated);
+
+        return redirect()
+            ->route('lokasi.index')
+            ->with('success', 'Lokasi berhasil ditambahkan');
+    }
+
+    public function show(Lokasi $lokasi)
+    {
+        return view('lokasi.show', compact('lokasi'));
+    }
+
+    public function edit(Lokasi $lokasi)
+    {
+        return view('lokasi.edit', compact('lokasi'));
     }
 
     public function update(Request $request, Lokasi $lokasi)
     {
-        $request->validate(['nama' => 'required']);
-        $lokasi->update($request->all());
+        $validated = $request->validate([
+            'nama' => 'required|string|max:255',
+            'deskripsi' => 'nullable|string',
+        ]);
 
-        return back()->with('success','Lokasi diperbarui');
+        $lokasi->update($validated);
+
+        return redirect()
+            ->route('lokasi.index')
+            ->with('success', 'Lokasi berhasil diperbarui');
     }
 
     public function destroy(Lokasi $lokasi)
     {
         $lokasi->delete();
-        return back()->with('success','Lokasi dihapus');
+
+        return redirect()
+            ->route('lokasi.index')
+            ->with('success', 'Lokasi berhasil dihapus');
     }
 }

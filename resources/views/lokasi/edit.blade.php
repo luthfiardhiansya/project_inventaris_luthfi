@@ -1,18 +1,19 @@
 @extends('layouts.dashboard')
 
-@section('title', 'Tambah Kategori')
+@section('title', 'Edit Lokasi')
 
 @section('content')
 <div class="card shadow-sm">
     <div class="card-body">
-        <form action="{{ route('kategori.store') }}" method="POST">
+        <form action="{{ route('lokasi.update', $lokasi) }}" method="POST">
             @csrf
+            @method('PUT')
 
             <div class="mb-3">
-                <label class="form-label">Nama Kategori</label>
+                <label class="form-label">Nama Lokasi</label>
                 <input type="text" name="nama"
                        class="form-control @error('nama') is-invalid @enderror"
-                       value="{{ old('nama') }}">
+                       value="{{ old('nama', $lokasi->nama) }}" required>
                 @error('nama')
                 <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
@@ -20,11 +21,12 @@
 
             <div class="mb-3">
                 <label class="form-label">Deskripsi</label>
-                <textarea name="deskripsi" class="form-control">{{ old('deskripsi') }}</textarea>
+                <textarea name="deskripsi"
+                          class="form-control">{{ old('deskripsi', $lokasi->deskripsi) }}</textarea>
             </div>
 
-            <button class="btn btn-primary">Simpan</button>
-            <a href="{{ route('kategori.index') }}" class="btn btn-secondary">Kembali</a>
+            <button class="btn btn-primary">Update</button>
+            <a href="{{ route('lokasi.index') }}" class="btn btn-secondary">Kembali</a>
         </form>
     </div>
 </div>

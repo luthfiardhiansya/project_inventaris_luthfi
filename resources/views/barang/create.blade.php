@@ -7,58 +7,60 @@
 
 <div class="card shadow-sm border-0">
     <div class="card-body">
-        <form action="{{ route('barang.store') }}" method="POST" enctype="multipart/form-data">
-            @csrf
+<form action="{{ route('barang.store') }}" method="POST" enctype="multipart/form-data">
+@csrf
+{{-- NAMA BARANG --}}
+<div class="mb-3">
+    <label class="form-label">Nama Barang</label>
+    <input type="text" name="nama_barang"
+           class="form-control @error('nama_barang') is-invalid @enderror"
+           value="{{ old('nama_barang') }}" required>
+</div>
 
-            <div class="mb-3">
-                <label class="form-label">Nama Barang</label>
-                <input type="text" name="nama"
-                       class="form-control @error('nama') is-invalid @enderror"
-                       value="{{ old('nama') }}" required>
-                @error('nama')<div class="invalid-feedback">{{ $message }}</div>@enderror
-            </div>
+{{-- KATEGORI --}}
+<div class="mb-3">
+    <label class="form-label">Kategori</label>
+    <select name="kategori_id" class="form-select" required>
+        @foreach($kategori as $item)
+            <option value="{{ $item->id }}">{{ $item->nama }}</option>
+        @endforeach
+    </select>
+</div>
 
-            <div class="mb-3">
-                <label class="form-label">Kategori</label>
-                <select name="kategori_id"
-                        class="form-select @error('kategori_id') is-invalid @enderror" required>
-                    <option value="">-- Pilih Kategori --</option>
-                    @foreach($kategori as $item)
-                        <option value="{{ $item->id }}"
-                            {{ old('kategori_id') == $item->id ? 'selected' : '' }}>
-                            {{ $item->nama }}
-                        </option>
-                    @endforeach
-                </select>
-                @error('kategori_id')<div class="invalid-feedback">{{ $message }}</div>@enderror
-            </div>
+{{-- LOKASI --}}
+<div class="mb-3">
+    <label class="form-label">Lokasi</label>
+    <select name="lokasi_id" class="form-select" required>
+        @foreach($lokasi as $item)
+            <option value="{{ $item->id }}">{{ $item->nama }}</option>
+        @endforeach
+    </select>
+</div>
 
-            <div class="mb-3">
-                <label class="form-label">Jumlah</label>
-                <input type="number" name="jumlah"
-                       class="form-control @error('jumlah') is-invalid @enderror"
-                       value="{{ old('jumlah') }}" required>
-                @error('jumlah')<div class="invalid-feedback">{{ $message }}</div>@enderror
-            </div>
+{{-- JUMLAH --}}
+<div class="mb-3">
+    <label class="form-label">Jumlah</label>
+    <input type="number" name="jumlah" class="form-control" required>
+</div>
 
-            <div class="mb-3">
-                <label class="form-label">Kondisi</label>
-                <select name="kondisi" class="form-select">
-                    <option value="baik">Baik</option>
-                    <option value="rusak">Rusak</option>
-                </select>
-            </div>
+{{-- SATUAN --}}
+<div class="mb-3">
+    <label class="form-label">Satuan</label>
+    <input type="text" name="satuan" class="form-control" required>
+</div>
 
-            <div class="mb-3">
-                <label class="form-label">Gambar</label>
-                <input type="file" name="gambar" class="form-control">
-            </div>
+{{-- KONDISI --}}
+<div class="mb-3">
+    <label class="form-label">Kondisi</label>
+    <select name="kondisi" class="form-select">
+        <option value="baik">Baik</option>
+        <option value="rusak">Rusak</option>
+    </select>
+</div>
 
-            <div class="text-end">
-                <a href="{{ route('barang.index') }}" class="btn btn-secondary">Batal</a>
-                <button class="btn btn-primary">Simpan</button>
-            </div>
-        </form>
+<button class="btn btn-primary">Simpan</button>
+</form>
+
     </div>
 </div>
 @endsection
