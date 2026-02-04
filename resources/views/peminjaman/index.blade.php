@@ -1,90 +1,99 @@
 @extends('layouts.dashboard')
 
-@section('title', 'Data Peminjaman')
-
 @section('content')
+<div class="container">
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h4 class="mb-0">Data Peminjaman</h4>
+    <h4 class="mb-3">Data Peminjaman</h4>
 
-    <a href="{{ route('peminjaman.create') }}" class="btn btn-primary">
-        <i class="bx bx-plus"></i> Tambah Data
+    @if(session('success'))
+        <div class="alert alert-success" id="flash-msg">
+            {{ session('success') }}
+        </div>
+    @endif
+
+    <a href="{{ route('peminjaman.create') }}" class="btn btn-primary mb-3">
+        + Tambah Peminjaman
     </a>
-</div>
 
-{{-- ALERT --}}
-@if(session('success'))
-    <div class="alert alert-success auto-dismiss">
-        {{ session('success') }}
-    </div>
-@endif
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>No</th>
+                <th>Kode</th>
+                <th>Nama Peminjam</th>
+                <th>Barang Dipinjam</th>
+                <th>Jumlah</th>
+                <th>Tanggal</th>
+                <th>Status</th>
+                <th>Aksi</th>
+            </tr>
+        </thead>
 
-@if(session('error'))
-    <div class="alert alert-danger auto-dismiss">
-        {{ session('error') }}
-    </div>
-@endif
-
-
-<div class="card shadow-sm border-0">
-    <div class="card-body p-0">
-        <table class="table table-striped table-hover mb-0">
-            <thead class="table-light">
+        <tbody>
+            @forelse ($peminjaman as $i => $p)
                 <tr>
-                    <th>No</th>
-                    <th>Kode</th>
-                    <th>Nama Peminjam</th>
-                    <th>Jenis</th>
-                    <th>Barang</th>
-                    <th>Jumlah</th>
-                    <th>Tanggal Pinjam</th>
-                    <th class="text-center">Aksi</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse ($peminjaman as $item)
-                <tr>
-                    <td>{{ $loop->iteration }}</td>
-                    <td>{{ $item->kode_peminjaman }}</td>
-                    <td>{{ $item->nama_peminjam }}</td>
-                    <td class="text-capitalize">{{ $item->jenis_peminjam }}</td>
-                    <td>{{ $item->barang->nama_barang }}</td>
-                    <td>{{ $item->jumlah }}</td>
-                    <td>{{ \Carbon\Carbon::parse($item->tanggal_pinjam)->format('d-m-Y') }}</td>
-                    <td class="text-center">
-                        <form action="{{ route('peminjaman.update', $item->id) }}"
-                              method="POST"
-                              class="d-inline">
-                            @csrf
-                            @method('PUT')
-                            <button class="btn btn-success btn-sm"
-                                    onclick="return confirm('Kembalikan barang ini?')">
-                                Kembalikan
-                            </button>
-                        </form>
+                    <td>{{ $i + 1 }}</td>
+                    <td>{{ $p->kode_peminjaman }}</td>
+                    <td>{{ $p->nama_peminjam }}</td>
+
+                    <td>
+                    @if ($p->barang->count())
+                            @foreach ($p->barang as $b)
+                            {{ $b->nama_barang }}
+                            @endforeach
+                    @else
+                        <span class="text-muted">-</span>
+                    @endif
+                    </td>
+
+                    <td>
+                    @if ($p->barang->count())
+                            @foreach ($p->barang as $b)
+                                {{ $b->pivot->jumlah }} 
+                            @endforeach
+                    @else
+                        <span class="text-muted">-</span>
+                    @endif
+                    </td>
+
+                    <td>{{ $p->tanggal_pinjam }}</td>
+
+                    <td>
+                        <span class="badge bg-{{ $p->status === 'dipinjam' ? 'warning' : 'success' }}">
+                            {{ ucfirst($p->status) }}
+                        </span>
+                    </td>
+
+                    <td>
+                        @if($p->status === 'dipinjam')
+                            <form action="{{ route('peminjaman.update', $p->id) }}" method="POST">
+                                @csrf
+                                @method('PUT')
+                                <button class="btn btn-sm btn-success">
+                                    Kembalikan
+                                </button>
+                            </form>
+                        @else
+                            <span class="text-muted">Selesai</span>
+                        @endif
                     </td>
                 </tr>
-                @empty
+            @empty
                 <tr>
-                    <td colspan="8" class="text-center text-muted py-4">
-                        Tidak ada peminjaman aktif
+                    <td colspan="7" class="text-center text-muted">
+                        Data peminjaman belum ada
                     </td>
                 </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
+            @endforelse
+        </tbody>
+    </table>
+
 </div>
 
 <script>
     setTimeout(() => {
-        document.querySelectorAll('.auto-dismiss').forEach(el => {
-            el.classList.add('fade');
-            el.classList.remove('show');
-
-            setTimeout(() => el.remove(), 500);
-        });
+        const msg = document.getElementById('flash-msg');
+        if (msg) msg.remove();
     }, 3000);
 </script>
-
 @endsection

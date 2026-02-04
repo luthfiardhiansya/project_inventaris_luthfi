@@ -12,8 +12,6 @@ class Peminjaman extends Model
         'kode_peminjaman',
         'nama_peminjam',
         'jenis_peminjam',
-        'barang_id',
-        'jumlah',
         'tanggal_pinjam',
         'tanggal_kembali',
         'status',
@@ -22,7 +20,8 @@ class Peminjaman extends Model
 
     public function barang()
     {
-        return $this->belongsTo(Barang::class);
+        return $this->belongsToMany(Barang::class, 'detail_peminjaman')
+            ->withPivot('jumlah', 'kondisi_sebelum', 'kondisi_sesudah');
     }
 
     public function user()

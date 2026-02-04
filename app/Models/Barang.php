@@ -34,7 +34,7 @@ class Barang extends Model
 
     public function peminjaman()
     {
-        return $this->hasMany(Peminjaman::class);
+        return $this->belongsToMany(Peminjaman::class, 'detail_peminjaman')
+            ->withPivot('jumlah', 'kondisi_sebelum', 'kondisi_sesudah');
     }
 }
-
