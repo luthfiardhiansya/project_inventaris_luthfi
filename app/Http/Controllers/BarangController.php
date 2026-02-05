@@ -7,21 +7,31 @@ use App\Models\Kategori;
 use App\Models\Lokasi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use App\Exports\BarangExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class BarangController extends Controller
 {
     public function index(Request $request)
-    {
-        $barang = Barang::with(['kategori', 'lokasi'])
-            ->when($request->search, function ($q) use ($request) {
+{
+    $barang = Barang::with(['kategori', 'lokasi'])
+        ->when($request->search, function ($query) use ($request) {
+            $query->where(function ($q) use ($request) {
                 $q->where('nama_barang', 'like', '%' . $request->search . '%')
                   ->orWhere('kode_barang', 'like', '%' . $request->search . '%');
-            })
-            ->latest()
-            ->paginate(10);
+            });
+        })
+        ->when($request->kategori, function ($query) use ($request) {
+            $query->where('kategori_id', $request->kategori);
+        })
+        ->latest()
+        ->paginate(10)
+        ->withQueryString();
 
-        return view('barang.index', compact('barang'));
-    }
+    $kategori = Kategori::orderBy('nama')->get();
+
+    return view('barang.index', compact('barang', 'kategori'));
+}
 
     public function create()
     {
@@ -95,4 +105,12 @@ class BarangController extends Controller
             ->route('barang.index')
             ->with('success', 'Barang berhasil dihapus');
     }
+    public function export()
+    {
+    return Excel::download(
+        new BarangExport,
+        'data-barang.xlsx'
+    );
+    }
+
 }

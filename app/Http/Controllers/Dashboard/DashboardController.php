@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Dashboard;
 
 use App\Http\Controllers\Controller;
 use App\Models\Peminjaman;
+use App\Models\Barang;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -11,6 +12,9 @@ class DashboardController extends Controller
 {
     public function index()
     {
+        /* ===============================
+           GRAFIK PEMINJAMAN 7 HARI
+        =============================== */
         $peminjaman = Peminjaman::select(
                 DB::raw('DATE(tanggal_pinjam) as tanggal'),
                 DB::raw('COUNT(*) as total')
@@ -21,7 +25,7 @@ class DashboardController extends Controller
             ->get();
 
         $labels = [];
-        $data = [];
+        $data   = [];
 
         for ($i = 6; $i >= 0; $i--) {
             $date = Carbon::now()->subDays($i)->format('Y-m-d');
@@ -32,6 +36,39 @@ class DashboardController extends Controller
             $data[] = $found ? $found->total : 0;
         }
 
-        return view('dashboard.index', compact('labels', 'data'));
+        /* ===============================
+           STATISTIK DASHBOARD
+        =============================== */
+        $totalBarang = Barang::count();
+
+        $barangBaik = Barang::where('kondisi', 'baik')->count();
+
+        $barangRusak = Barang::whereIn('kondisi', [
+            'rusak_ringan',
+            'rusak_berat'
+        ])->count();
+
+        $barangHilang = Barang::where('kondisi', 'hilang')->count();
+
+        $barangDipinjam = Peminjaman::where('status', 'dipinjam')->count();
+
+        $totalPeminjaman = Peminjaman::count();
+
+        $peminjamanHariIni = Peminjaman::whereDate(
+            'tanggal_pinjam',
+            today()
+        )->count();
+
+        return view('dashboard.index', compact(
+            'labels',
+            'data',
+            'totalBarang',
+            'barangBaik',
+            'barangRusak',
+            'barangHilang',
+            'barangDipinjam',
+            'totalPeminjaman',
+            'peminjamanHariIni'
+        ));
     }
 }

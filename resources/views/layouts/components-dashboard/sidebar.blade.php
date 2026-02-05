@@ -65,12 +65,13 @@
         </li>
 
         <!-- Layouts -->
-        <li class="menu-header small text-uppercase">
-            <span class="menu-header-text">Pages</span>
-        </li>
-
         @auth
         @if (auth()->user()->role === 'admin')
+
+        <li class="menu-header small text-uppercase">
+            <span class="menu-header-text">USER</span>
+        </li>
+
         <li class="menu-item {{ request()->routeIs('dashboard.users.*') ? 'active' : '' }}">
             <a href="{{ route('dashboard.users.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-user"></i>
@@ -80,10 +81,14 @@
         @endif
         @endauth
 
+        <li class="menu-header small text-uppercase">
+        <span class="menu-header-text">PAGES</span>
+        </li>
+
         <li class="menu-item">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons bx bx-dock-top"></i>
-                <div data-i18n="Account Settings">Product Management</div>
+                <div data-i18n="Account Settings">Data Management</div>
             </a>
             <ul class="menu-sub">
                 <li class="menu-item">
@@ -102,7 +107,7 @@
                     </a>
                 </li>
             </ul>
-        <li class="menu-item">
+        <li class="menu-item {{ request()->routeIs('peminjaman.index') ? 'active' : '' }}">
             <a href="{{ route('peminjaman.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-task"></i>
                 <div data-i18n="Analytics">Peminjaman</div>

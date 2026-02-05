@@ -6,17 +6,29 @@ use App\Models\Peminjaman;
 use App\Models\Barang;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Exports\PeminjamanExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class PeminjamanController extends Controller
 {
-    public function index()
-    {
-        $peminjaman = Peminjaman::with(['barang', 'user'])
-            ->latest()
-            ->get();
+    public function index(Request $request)
+{
+    $peminjaman = Peminjaman::with(['barang', 'user'])
+        ->when($request->search, function ($query) use ($request) {
+            $query->where(function ($q) use ($request) {
+                $q->where('kode_peminjaman', 'like', '%' . $request->search . '%')
+                  ->orWhere('nama_peminjam', 'like', '%' . $request->search . '%');
+            });
+        })
+        ->when($request->tanggal, function ($query) use ($request) {
+            $query->whereDate('tanggal_pinjam', $request->tanggal);
+        })
+        ->latest()
+        ->get();
 
-        return view('peminjaman.index', compact('peminjaman'));
-    }
+    return view('peminjaman.index', compact('peminjaman'));
+}
+
 
     public function create()
     {
@@ -93,4 +105,13 @@ class PeminjamanController extends Controller
 
         return back()->with('success', 'Barang berhasil dikembalikan');
     }
+
+    public function export()
+    {
+    return Excel::download(
+        new PeminjamanExport,
+        'data-peminjaman.xlsx'
+    );
+    }
+
 }

@@ -30,3 +30,14 @@ Route::middleware('auth')->group(function () {
     Route::resource('lokasi', LokasiController::class);
     Route::resource('peminjaman', PeminjamanController::class);
 });
+
+Route::get(
+    'peminjaman-export',
+    [PeminjamanController::class, 'export']
+)->name('peminjaman.export');
+
+Route::get(
+    'barang-export',
+    [BarangController::class, 'export']
+)->name('barang.export');
+
