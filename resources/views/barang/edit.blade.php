@@ -8,17 +8,28 @@
 <div class="card border-0 shadow-sm">
     <div class="card-body">
 
-        <form action="{{ route('barang.update', $barang->id) }}" method="POST">
+        <form action="{{ route('barang.update', $barang->id) }}"
+            method="POST"
+            enctype="multipart/form-data">
             @csrf
             @method('PUT')
 
-            {{-- KODE BARANG (READONLY) --}}
             <div class="mb-3">
                 <label class="form-label">Kode Barang</label>
                 <input type="text" class="form-control" value="{{ $barang->kode_barang }}" readonly>
             </div>
 
-            {{-- NAMA --}}
+            <div class="mb-3">
+                <label class="form-label">Foto Barang</label>
+                <input type="file" name="foto"
+                       class="form-control @error('foto') is-invalid @enderror"
+                       accept="image/*">
+
+                @error('foto')
+            <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+            </div>
+
             <div class="mb-3">
                 <label class="form-label">Nama Barang</label>
                 <input type="text" name="nama_barang"
@@ -26,7 +37,6 @@
                        value="{{ old('nama_barang', $barang->nama_barang) }}" required>
             </div>
 
-            {{-- KATEGORI --}}
             <div class="mb-3">
                 <label class="form-label">Kategori</label>
                 <select name="kategori_id" class="form-select" required>
@@ -39,7 +49,6 @@
                 </select>
             </div>
 
-            {{-- LOKASI --}}
             <div class="mb-3">
                 <label class="form-label">Lokasi</label>
                 <select name="lokasi_id" class="form-select" required>
@@ -52,7 +61,6 @@
                 </select>
             </div>
 
-            {{-- JUMLAH --}}
             <div class="mb-3">
                 <label class="form-label">Jumlah</label>
                 <input type="number" name="jumlah"
@@ -60,7 +68,6 @@
                        value="{{ $barang->jumlah }}" required>
             </div>
 
-            {{-- SATUAN --}}
             <div class="mb-3">
                 <label class="form-label">Satuan</label>
                 <input type="text" name="satuan"
@@ -68,7 +75,6 @@
                        value="{{ $barang->satuan }}" required>
             </div>
 
-            {{-- KONDISI --}}
             <div class="mb-3">
                 <label class="form-label">Kondisi</label>
                 <select name="kondisi" class="form-select">
@@ -80,6 +86,13 @@
                     </option>
                 </select>
             </div>
+
+            <div class="mb-3">
+                <label class="form-label">Deskripsi</label>
+                <textarea name="deskripsi"
+                class="form-control"
+                rows="3">{{ old('deskripsi') }}</textarea>
+            </div>            
 
             <div class="d-flex gap-2">
                 <button class="btn btn-primary">Update</button>

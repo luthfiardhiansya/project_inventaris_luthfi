@@ -7,31 +7,32 @@ use App\Models\Kategori;
 use App\Models\Lokasi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 use App\Exports\BarangExport;
 use Maatwebsite\Excel\Facades\Excel;
 
 class BarangController extends Controller
 {
     public function index(Request $request)
-{
-    $barang = Barang::with(['kategori', 'lokasi'])
-        ->when($request->search, function ($query) use ($request) {
-            $query->where(function ($q) use ($request) {
-                $q->where('nama_barang', 'like', '%' . $request->search . '%')
-                  ->orWhere('kode_barang', 'like', '%' . $request->search . '%');
-            });
-        })
-        ->when($request->kategori, function ($query) use ($request) {
-            $query->where('kategori_id', $request->kategori);
-        })
-        ->latest()
-        ->paginate(10)
-        ->withQueryString();
+    {
+        $barang = Barang::with(['kategori', 'lokasi'])
+            ->when($request->search, function ($query) use ($request) {
+                $query->where(function ($q) use ($request) {
+                    $q->where('nama_barang', 'like', '%' . $request->search . '%')
+                      ->orWhere('kode_barang', 'like', '%' . $request->search . '%');
+                });
+            })
+            ->when($request->kategori, function ($query) use ($request) {
+                $query->where('kategori_id', $request->kategori);
+            })
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
 
-    $kategori = Kategori::orderBy('nama')->get();
+        $kategori = Kategori::orderBy('nama')->get();
 
-    return view('barang.index', compact('barang', 'kategori'));
-}
+        return view('barang.index', compact('barang', 'kategori'));
+    }
 
     public function create()
     {
@@ -50,6 +51,8 @@ class BarangController extends Controller
             'jumlah'      => 'required|integer|min:0',
             'satuan'      => 'required|string|max:20',
             'kondisi'     => 'required|in:baik,rusak',
+            'deskripsi'   => 'nullable|string',
+            'foto'        => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
         do {
@@ -58,16 +61,16 @@ class BarangController extends Controller
 
         $validated['kode_barang'] = $kode;
 
+        if ($request->hasFile('foto')) {
+            $validated['foto'] = $request->file('foto')
+                ->store('barang', 'public');
+        }
+
         Barang::create($validated);
 
         return redirect()
             ->route('barang.index')
             ->with('success', 'Barang berhasil ditambahkan');
-    }
-
-    public function show(Barang $barang)
-    {
-        return view('barang.show', compact('barang'));
     }
 
     public function edit(Barang $barang)
@@ -88,7 +91,18 @@ class BarangController extends Controller
             'jumlah'      => 'required|integer|min:0',
             'satuan'      => 'required|string|max:20',
             'kondisi'     => 'required|in:baik,rusak',
+            'deskripsi'   => 'nullable|string',
+            'foto'        => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
+
+        if ($request->hasFile('foto')) {
+            if ($barang->foto) {
+                Storage::disk('public')->delete($barang->foto);
+            }
+
+            $validated['foto'] = $request->file('foto')
+                ->store('barang', 'public');
+        }
 
         $barang->update($validated);
 
@@ -97,20 +111,29 @@ class BarangController extends Controller
             ->with('success', 'Barang berhasil diperbarui');
     }
 
+    public function show(Barang $barang)
+    {
+    return view('barang.show', compact('barang'));
+    }
+
     public function destroy(Barang $barang)
     {
+        if ($barang->foto) {
+            Storage::disk('public')->delete($barang->foto);
+        }
+
         $barang->delete();
 
         return redirect()
             ->route('barang.index')
             ->with('success', 'Barang berhasil dihapus');
     }
+
     public function export()
     {
-    return Excel::download(
-        new BarangExport,
-        'data-barang.xlsx'
-    );
+        return Excel::download(
+            new BarangExport,
+            'data-barang.xlsx'
+        );
     }
-
 }

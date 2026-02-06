@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon; 
 
 class Barang extends Model
 {
@@ -21,6 +22,19 @@ class Barang extends Model
         'deskripsi',
         'foto'
     ];
+
+    protected $casts = [
+        'tanggal_beli' => 'date',
+    ];
+
+    protected static function booted()
+    {
+        static::creating(function ($barang) {
+            if (!$barang->tanggal_beli) {
+                $barang->tanggal_beli = Carbon::today();
+            }
+        });
+    }
 
     public function kategori()
     {

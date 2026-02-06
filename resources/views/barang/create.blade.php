@@ -8,8 +8,21 @@
 <div class="card border-0 shadow-sm">
     <div class="card-body">
 
-        <form action="{{ route('barang.store') }}" method="POST">
+            <form action="{{ route('barang.store') }}"
+            method="POST"
+            enctype="multipart/form-data">
             @csrf
+
+            <div class="mb-3">
+                <label class="form-label">Foto Barang</label>
+                <input type="file" name="foto"
+                class="form-control @error('foto') is-invalid @enderror"
+                accept="image/*">
+                @error('foto')
+            <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+            </div>
+
 
             <div class="mb-3">
                 <label class="form-label">Nama Barang</label>
@@ -77,6 +90,14 @@
                     </option>
                 </select>
             </div>
+
+            <div class="mb-3">
+                <label class="form-label">Deskripsi</label>
+                <textarea name="deskripsi"
+                class="form-control"
+                rows="3">{{ old('deskripsi') }}</textarea>
+            </div>
+
 
             <div class="d-flex gap-2">
                 <button class="btn btn-primary">Simpan</button>
